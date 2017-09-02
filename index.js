@@ -36,14 +36,14 @@ function getauthentication(usr,pass,fn) {
     });
 }
 
-function browser(usr,pass,flat,all,fn) {
+function browser(usr,pass,option,fn) {
     getauthentication(usr,pass,function (err,res) {
         if(err){
             return fn(err,null);
         }else{
             // console.log(typeof res);
             if(typeof res == 'object'){
-                brow.getBrowsers(usr,pass,flat,all,fn);
+                brow.getBrowsers(usr,pass,option,fn);
             }else{
                 return fn('Internal server Error',null);
             }
@@ -51,13 +51,13 @@ function browser(usr,pass,flat,all,fn) {
         }
     });
 }
-function workers(usr,pass,fn){
+function workers(usr,pass,option,fn){
     getauthentication(usr,pass,function (err,res) {
         if(err){
             return fn(err,null);
         }else{
             if(typeof res == 'object'){
-                work.getWorkers(usr,pass,fn);
+                work.getWorkers(usr,pass,option,fn);
             }else{
                 return fn('Internal server Error',null);
             }
