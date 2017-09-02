@@ -6,10 +6,13 @@ var http = require('http');
 // var curl = require('curl-cmd');
 var exec = require('exec');
 
+var baseUrl= ' https://api.browserstack.com/4';
+
 module.exports = {
     getauthentication:getauthentication,
     browser:browser,
-    workers: workers
+    workers: workers,
+    getStatus:getStatus,
 };
 
 function getauthentication(usr,pass,fn) {
@@ -20,7 +23,6 @@ function getauthentication(usr,pass,fn) {
         return fn("Define Access Key",null) ;
     }
     var baseAuth= '"'+usr+':'+pass +'"';
-    var baseUrl= ' https://api.browserstack.com/4';
     var cmd ='curl -u '+baseAuth+ baseUrl;
     exec(cmd, function(err, out, code) {
         if (err instanceof Error)
@@ -34,14 +36,14 @@ function getauthentication(usr,pass,fn) {
     });
 }
 
-function browser(usr,pass,fn) {
+function browser(usr,pass,flat,all,fn) {
     getauthentication(usr,pass,function (err,res) {
         if(err){
             return fn(err,null);
         }else{
             // console.log(typeof res);
             if(typeof res == 'object'){
-                brow.getBrowsers(res);
+                brow.getBrowsers(usr,pass,flat,all,fn);
             }else{
                 return fn('Internal server Error',null);
             }
@@ -49,13 +51,40 @@ function browser(usr,pass,fn) {
         }
     });
 }
-function workers(fn){
+function workers(usr,pass,fn){
     getauthentication(usr,pass,function (err,res) {
         if(err){
             return fn(err,null);
         }else{
             if(typeof res == 'object'){
-                return work.getWorkers();
+                work.getWorkers(usr,pass,fn);
+            }else{
+                return fn('Internal server Error',null);
+            }
+        }
+    });
+}
+
+function getStatus(usr,pass,fn) {
+    getauthentication(usr,pass,function (err,res) {
+        console.log(err,res);
+        if(err){
+            return fn(err,null);
+        }else{
+            if(typeof res == 'object'){
+                var baseAuth= '"'+usr+':'+pass +'"';
+                var cmd ='curl -u '+baseAuth+ baseUrl +'/status';
+                console.log(cmd);
+                exec(cmd, function(err, out, code) {
+                    if (err instanceof Error)
+                        throw err;
+                    try{
+                        return fn(null,JSON.parse(out));
+                    }
+                    catch (e){
+                        return fn(out,null);
+                    }
+                });
             }else{
                 return fn('Internal server Error',null);
             }
